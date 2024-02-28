@@ -45,7 +45,7 @@ Result ThreadPool::submitTask(const std::shared_ptr<Task> sp) {
                            [&]() -> bool { return taskQue_.size() < taskQueMaxThreshHold_; })) {
         std::cerr << "task queue is full sunmit task fail." << std::endl;
 
-        return {sp, false};
+        return Result(sp, false);
     }
 
     taskQue_.emplace(sp);
@@ -53,7 +53,7 @@ Result ThreadPool::submitTask(const std::shared_ptr<Task> sp) {
 
     notEmpty_.notify_all();
 
-    return Result(sp, true);
+    return Result(sp);
 }
 
 void ThreadPool::threadFunc() {
@@ -86,7 +86,7 @@ void ThreadPool::threadFunc() {
         }
 
         if (task != nullptr) {
-            task->run();
+            task->exec();
         }
     }
 }
@@ -112,8 +112,8 @@ Result::Result(std::shared_ptr<Task> task, bool isVaild)
 }
 
 Any Result::get() {
-    if (isVaild_) {
-        return "";
+    if (!isVaild_) {
+        return {};
     }
 
     sem_.wait();

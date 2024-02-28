@@ -26,16 +26,16 @@ public:
 
     /// \brief 这个构造函数可以让Any类型接受任意其他的数据
     template<typename T>
-    Any(T data): base_(std::make_unique<Derive < T> > (data)) {
+    Any(T data): base_(std::make_unique<Derive < T > > (data)) {
 
     }
 
 public:
     template<typename T>
     T cast_() {
-        auto *pd = dynamic_cast < Derive < T > * > (base_.get());
+        Derive <T> *pd = dynamic_cast < Derive <T> * > (base_.get());
         if (nullptr == pd) {
-            throw "type is unmatch!";
+            throw std::runtime_error("Type is unmatch!"); // 抛出标准异常
         }
 
         return pd->data_;
@@ -50,7 +50,8 @@ private:
     template<typename T>
     class Derive : public Base {
     public:
-        Derive(T data) : data_(data) {
+        Derive(T data)
+                : data_(data) {
 
         }
 
@@ -98,7 +99,7 @@ class Task;
 
 class Result {
 public:
-    Result(std::shared_ptr<Task> task, bool isVaild);
+    Result(std::shared_ptr<Task> task, bool isVaild = true);
 
     ~Result() = default;
 
@@ -111,7 +112,7 @@ private:
     Any any_;                           /// 存储任务的返回值
     Semaphore sem_;                     /// 线程通信信号量
     std::shared_ptr<Task> task_;        /// 指向对应获取返回值的任务对象
-    std::atomic_bool isVaild_ = false;  /// 是否有效
+    std::atomic_bool isVaild_;  /// 是否有效
 };
 
 /// 任务抽象基类
