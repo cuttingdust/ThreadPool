@@ -35,8 +35,6 @@ set(CMAKE_CXX_STANDARD 17)
 message(STATUS "================ ${name} cpp_execute =================")
 get_src_include()
 
-include_directories(${H_FILE_I})
-
 # 添加执行程序
 add_executable(${PROJECT_NAME}
      ${SRC}
@@ -44,6 +42,10 @@ add_executable(${PROJECT_NAME}
      ${UIC_HEADER}
      ${QRC_SOURCE_FILES}
      ${RC_FILE}
+)
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/include
 )
 
 
