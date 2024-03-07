@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <vector>
+#include <unordered_map>
 #include <queue>
 #include <memory>
 #include <atomic>
@@ -26,7 +27,7 @@ public:
 
     /// \brief 这个构造函数可以让Any类型接受任意其他的数据
     template<typename T>
-    Any(T data): base_(std::make_unique<Derive < T > > (data)) {
+    Any(T data): base_(std::make_unique<Derive < T> > (data)) {
 
     }
 
@@ -142,17 +143,22 @@ enum PoolMode {
 /// 线程类型
 class Thread {
 public:
-    using ThreadFunc = std::function<void()>;
+    using ThreadFunc = std::function<void(int)>;
 
-    Thread(ThreadFunc func);
+    explicit Thread(ThreadFunc func);
 
     virtual ~Thread();
 
 public:
     void start();
 
+    int getId() const;
 private:
     ThreadFunc func_ = nullptr;
+
+    static int generateId;
+
+    int threadId_;
 };
 
 
@@ -170,6 +176,9 @@ public:
     /// \brief 设置task任务队列上线阈值
     void setTaskQueMaxThreshHold(int threshHold);
 
+    /// \brief 设置线程池cache模式下线程阈值
+    void setThreadSizeThreadHold(int threshHold);
+
     /// \brief  给线程池提交任务
     /// \return 线程返回值
     Result submitTask(const std::shared_ptr<Task> sp);
@@ -178,7 +187,10 @@ public:
     void start(int threadSize = 4);
 
 public:
-    void threadFunc();
+    /// \brief 线程函数
+    void threadFunc(int threadId);
+
+    bool checkRunningState() const;
 
 public:
     /// 限制拷贝使用
@@ -187,8 +199,11 @@ public:
     ThreadPool &operator=(const ThreadPool &other) = delete;
 
 private:
-    std::vector<std::unique_ptr<Thread>> threads_;                  ///线程列表
+    std::unordered_map<int, std::unique_ptr<Thread>> threads_;  ///线程列表
     size_t initThreadSize_;                         /// 初始的线程数量
+    int threadSizeThreshHold_;                      /// 线程数量上限阈值
+    std::atomic_int  curThreadSize_;                /// 记录当前线程池里面线程的总数量
+    std::atomic_int idleThreadSize_;                /// 记录线程的数量
 
     std::queue<std::shared_ptr<Task>> taskQue_;     /// 任务队列
     std::atomic_int taskSize_;                      /// 任务数量
@@ -199,6 +214,8 @@ private:
     std::condition_variable notEmpty_;              /// 表示任务队列不空
 
     PoolMode poolMode_;
+
+    std::atomic_bool isRunning_;                    /// 表示当前线程池的启动状态
 };
 
 #endif // THREAD_POOL
