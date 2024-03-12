@@ -4,6 +4,8 @@
 #include <chrono>
 #include <thread>
 
+using uLong = unsigned long long;
+
 class MyTask : public Task {
 public:
     MyTask(int begin, int end)
@@ -19,7 +21,7 @@ public:
                   << " begin!" << std::endl;
 
         std::this_thread::sleep_for(std::chrono::seconds(3));
-        user_ulong_t sum = 0;
+        uLong sum = 0;
         for (int i = begin_; i < end_; ++i) {
             sum += i;
         }
@@ -40,20 +42,22 @@ int main(int argc, char *argv[]) {
     {
         ThreadPool pool;
 
+
         pool.setModel(PoolMode::PM_CACHED);
         pool.start(4);
+
 
         Result res1 = pool.submitTask(std::make_shared<MyTask>(1, 100000000));
         Result res2 = pool.submitTask(std::make_shared<MyTask>(100000001, 200000000));
         Result res3 = pool.submitTask(std::make_shared<MyTask>(200000001, 300000000));
         pool.submitTask(std::make_shared<MyTask>(200000001, 300000000));
 
-        pool.submitTask(std::make_shared<MyTask>(200000001, 300000000));
-        pool.submitTask(std::make_shared<MyTask>(200000001, 300000000));
 
-        auto sum1 = res1.get().cast_<user_ulong_t>();
-        auto sum2 = res2.get().cast_<user_ulong_t>();
-        auto sum3 = res3.get().cast_<user_ulong_t>();
+    auto sum1 = res1.get().cast_<uLong>();
+    auto sum2 = res2.get().cast_<uLong>();
+    auto sum3 = res3.get().cast_<uLong>();
+    std::cout << " slave:" << (sum1 + sum2 + sum3) << std::endl;
+
 
         std::cout << " slave:" << (sum1 + sum2 + sum3) << std::endl;
     }
