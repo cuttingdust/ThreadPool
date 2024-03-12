@@ -36,23 +36,28 @@ private:
 };
 
 int main(int argc, char *argv[]) {
-    ThreadPool pool;
 
-    pool.setModel(PoolMode::PM_CACHED);
-    pool.start(4);
+    {
+        ThreadPool pool;
 
-    Result res1 = pool.submitTask(std::make_shared<MyTask>(1, 100000000));
-    Result res2 = pool.submitTask(std::make_shared<MyTask>(100000001, 200000000));
-    Result res3 = pool.submitTask(std::make_shared<MyTask>(200000001, 300000000));
-    pool.submitTask(std::make_shared<MyTask>(200000001, 300000000));
+        pool.setModel(PoolMode::PM_CACHED);
+        pool.start(4);
 
-    pool.submitTask(std::make_shared<MyTask>(200000001, 300000000));
-    pool.submitTask(std::make_shared<MyTask>(200000001, 300000000));
+        Result res1 = pool.submitTask(std::make_shared<MyTask>(1, 100000000));
+        Result res2 = pool.submitTask(std::make_shared<MyTask>(100000001, 200000000));
+        Result res3 = pool.submitTask(std::make_shared<MyTask>(200000001, 300000000));
+        pool.submitTask(std::make_shared<MyTask>(200000001, 300000000));
 
-    auto sum1 = res1.get().cast_<user_ulong_t>();
-    auto sum2 = res2.get().cast_<user_ulong_t>();
-    auto sum3 = res3.get().cast_<user_ulong_t>();
-    std::cout << " slave:" << (sum1 + sum2 + sum3) << std::endl;
+        pool.submitTask(std::make_shared<MyTask>(200000001, 300000000));
+        pool.submitTask(std::make_shared<MyTask>(200000001, 300000000));
+
+        auto sum1 = res1.get().cast_<user_ulong_t>();
+        auto sum2 = res2.get().cast_<user_ulong_t>();
+        auto sum3 = res3.get().cast_<user_ulong_t>();
+
+        std::cout << " slave:" << (sum1 + sum2 + sum3) << std::endl;
+    }
+
 
 //    user_ulong_t sum = 0;
 //    for (int i = 0; i < 300000000; ++i) {
