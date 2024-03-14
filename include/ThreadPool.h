@@ -8,6 +8,7 @@
 #include <memory>
 #include <atomic>
 #include <mutex>
+#include <thread>
 #include <condition_variable>
 #include <functional>
 
@@ -184,7 +185,7 @@ public:
     Result submitTask(const std::shared_ptr<Task> sp);
 
     /// \brief 开启线程池
-    void start(int threadSize = 4);
+    void start(int threadSize = std::thread::hardware_concurrency());
 
 public:
     /// \brief 线程函数
