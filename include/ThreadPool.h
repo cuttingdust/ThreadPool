@@ -68,15 +68,20 @@ private:
 class Semaphore {
 public:
     Semaphore(int limit = 0)
-            : resLimit_(limit) {
+            : resLimit_(limit), isExist_(false) {
 
     }
 
-    ~Semaphore() = default;
+    ~Semaphore() {
+        isExist_ = true;
+    }
 
 public:
     /// \brief 获取一个信号量资源
     void wait() {
+        if (isExist_)
+            return;
+
         std::unique_lock<std::mutex> lock(mtx_);
         cond_.wait(lock, [&]() -> bool {
             return resLimit_ > 0;
@@ -86,12 +91,16 @@ public:
 
     /// \brief 增加一个信号量资源
     void post() {
+        if (isExist_)
+            return;
+
         std::unique_lock<std::mutex> lock(mtx_);
         resLimit_++;
         cond_.notify_all();
     }
 
 private:
+    std::atomic_bool isExist_;
     int resLimit_;
     std::mutex mtx_;
     std::condition_variable cond_;
@@ -154,6 +163,7 @@ public:
     void start();
 
     int getId() const;
+
 private:
     ThreadFunc func_ = nullptr;
 
@@ -203,7 +213,7 @@ private:
     std::unordered_map<int, std::unique_ptr<Thread>> threads_;  ///线程列表
     size_t initThreadSize_;                         /// 初始的线程数量
     int threadSizeThreshHold_;                      /// 线程数量上限阈值
-    std::atomic_int  curThreadSize_;                /// 记录当前线程池里面线程的总数量
+    std::atomic_int curThreadSize_;                /// 记录当前线程池里面线程的总数量
     std::atomic_int idleThreadSize_;                /// 记录线程的数量
 
     std::queue<std::shared_ptr<Task>> taskQue_;     /// 任务队列

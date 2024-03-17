@@ -52,12 +52,14 @@ int main(int argc, char *argv[]) {
         Result res3 = pool.submitTask(std::make_shared<MyTask>(200000001, 300000000));
         pool.submitTask(std::make_shared<MyTask>(200000001, 300000000));
 
+        pool.submitTask(std::make_shared<MyTask>(200000001, 300000000));
+        pool.submitTask(std::make_shared<MyTask>(200000001, 300000000));
 
-    auto sum1 = res1.get().cast_<uLong>();
-    auto sum2 = res2.get().cast_<uLong>();
-    auto sum3 = res3.get().cast_<uLong>();
-    std::cout << " slave:" << (sum1 + sum2 + sum3) << std::endl;
 
+        auto sum1 = res1.get().cast_<uLong>();
+        auto sum2 = res2.get().cast_<uLong>();
+        auto sum3 = res3.get().cast_<uLong>();
+        std::cout << " slave:" << (sum1 + sum2 + sum3) << std::endl;
 
         std::cout << " slave:" << (sum1 + sum2 + sum3) << std::endl;
     }
