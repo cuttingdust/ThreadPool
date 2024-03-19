@@ -1,10 +1,6 @@
 #include "ThreadPool.h"
 
-
-using uLong = unsigned long long;
-
 int sum1(int a, int b) {
-
     std::this_thread::sleep_for(std::chrono::seconds(1));
     return a + b;
 }
